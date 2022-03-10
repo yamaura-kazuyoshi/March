@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        canvas {
+            background: #eee;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1000" height="600"></canvas>
+
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        var ballRadius = 10;
+        var x = canvas.width / 2;
+        var y = canvas.height - 15;
+        var dx = 2;
+        var dy = -2;
+        ctx.fillStyle = "#0095DD";
+        balls = [];
+        ballCount = 2;
+        let goalBallNumber = -1;
+        const move = 0;
+        const set = 1;
+        const setup = 2;
+        let state = set;
+        let setBallCount = 2;
+        var vector;
+        var mx;
+        var my;
+        let startdx;
+        let startdy;
+        class Material {
+            constructor(x, y, dx, dy, width, height) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.width = width;
+                this.height = height;
+            }
+        }
+        class Ball extends Material {
+            constructor(x, y, ballRadius, dx, dy) {
+                super(x, y, dy, dx, 0, 0)
+                this.ballRadius = ballRadius;
+                this.velocity = Math.sqrt(Math.pow(dy, 2) + Math.pow(dx, 2));
+            }
+            get drawBall() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.ballRadius, 0, Math.PI * 2);
+                //ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            get calculateVector() {
+                dy = this.velocity * my / vector;
+                dx = this.velocity * mx / vector;
+                setBallCount = 0;
+                state = move;
+                goalBallNumber = -1;
+            }
+        }
+
+        class OneBrick extends Material {
+            #status; #enduranceValue;
+            constructor(x, y, dx, dy, width, height, status, enduranceValue) {
+                super(x, y, dx, dy, width, height);
+                this.#status = status;
+                this.#enduranceValue = enduranceValue;
+            }
+            get getStatus() { return this.#status; }
+            set setStatus(arg) { this.#status = arg; }
+            get getEnduranceValue() { return this.#enduranceValue; }
+            set setEnduranceValue(arg) { this.#enduranceValue = arg; }
+            detectCollisionWith(ball, ballNumber) {
+                if (this.getStatus == 1) {
+                    if (ball.x > this.x && ball.x < this.x + this.width &&
+                        ball.y > this.y - ball.getBallRadius && ball.y < this.y + this.height + ball.getBallRadius) {
+                        ball.dy = -ball.dy;
+                        random(ballNumber);
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            display.setCount = display.getCount + 1;
+                            display.setScore = display.getCount * 10;
+                            if (display.getScore == bricksCount * 10) {
+                                alert("YOU WIN, CONGRATULATIONS!" + display.getScore + "POINT!!");
+                                location.href = 'heartHeart.html'
+                                //document.location.reload();
+                            }
+                        }
+                    }
+                    if (ball.x > this.x - ball.getBallRadius && ball.x < this.x + this.width + ball.getBallRadius &&
+                        ball.y > this.y && ball.y < this.y + this.height) {
+                        ball.dx = -ball.dx;
+                        random(ballNumber);
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            display.setCount = display.getCount + 1;
+                            display.setScore = display.getCount * 10;
+                            if (display.getScore == bricksCount * 10) {
+                                alert("YOU WIN, CONGRATULATIONS!" + display.getScore + "POINT!!");
+                                location.href = 'heartObject2.html'
+                                //document.location.reload();
+                            }
+                        }
+                    }
+                    else if ((this.x - ball.x) * (this.x - ball.x) + (this.y - ball.y) * (this.y - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x + this.width - ball.x) * (this.x + this.width - ball.x) + (this.y - ball.y) * (this.y - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x + this.width - ball.x) * (this.x + this.width - ball.x) + (this.y + this.height - ball.y) * (this.y + this.height - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x - ball.x) * (this.x - ball.x) + (this.y + this.height - ball.y) * (this.y + this.height - ball.y) < ball.getBallRadius * ball.getBallRadius) {
+                        ball.dy = -ball.dy;
+                        ball.dx = -ball.dx;
+                        random(ballNumber);
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            display.setCount = display.getCount + 1;
+                            display.setScore = display.getCount * 10;
+                            if (display.getScore == bricksCount * 10) {
+                                alert("YOU WIN, CONGRATULATIONS!" + display.getScore + "POINT!!");
+                                location.href = 'heartObject2.html'
+                                //document.location.reload();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        class QuestionBrick extends OneBrick {
+            act2 = function () {
+                ball = new Ball(Math.floor(Math.random() * rightwall.x));
+                balls.push(ball);
+            }
+            //act = [increaseBall, gettinShortPaddle, gettingLongPaddle];
+            constructor(x, y, dx, dy, width, height, status, enduranceValue) {
+                super(x, y, dx, dy, width, height, status, enduranceValue);
+            }
+            detectCollisionWith(ball) {
+                if (this.getStatus == 1) {
+                    if (ball.x > this.x && ball.x < this.x + this.width && ball.y > this.y && ball.y < this.y + this.height) {
+                        ball.dy = -ball.dy;
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            //r = Math.floor(Math.random() * 3);
+                            //this.act[r]();
+                            this.act2();
+                        }
+                    }
+                    if (ball.x > this.x - ball.getBallRadius && ball.x < this.x + this.width + ball.getBallRadius &&
+                        ball.y > this.y && ball.y < this.y + this.height) {
+                        ball.dx = -ball.dx;
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            this.act2();
+                        }
+                    }
+                    else if ((this.x - ball.x) * (this.x - ball.x) + (this.y - ball.y) * (this.y - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x + this.width - ball.x) * (this.x + this.width - ball.x) + (this.y - ball.y) * (this.y - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x + this.width - ball.x) * (this.x + this.width - ball.x) + (this.y + this.height - ball.y) * (this.y + this.height - ball.y) < ball.getBallRadius * ball.getBallRadius ||
+                        (this.x - ball.x) * (this.x - ball.x) + (this.y + this.height - ball.y) * (this.y + this.height - ball.y) < ball.getBallRadius * ball.getBallRadius) {
+                        ball.dy = -ball.dy;
+                        ball.dx = -ball.dx;
+                        this.setEnduranceValue = this.getEnduranceValue - 1;
+                        if (this.getEnduranceValue == 0) {
+                            this.setStatus = 0;
+                            this.act2();
+                        }
+                    }
+                }
+            }
+            move(qbrick) {
+                if (qbrick.x + qbrick.dx > canvas.width - qbrick.width || qbrick.x + qbrick.dx < 0) {
+                    qbrick.dx = -qbrick.dx;
+                }
+                qbrick.x += qbrick.dx;
+            }
+        }
+        let ball = new Ball(x, y, ballRadius, dx, dy);
+        balls.push(ball);
+        let ball2 = new Ball(x, y, ballRadius, dx, dy);
+        balls.push(ball2);
+        let qbrick = new QuestionBrick();
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            //ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+        function random() {
+            // 色をランダムで設定
+            var color = { r: 0, g: 0, b: 0 };    // RGB 0～255の値で設定
+            for (var i in color) {
+                color[i] = Math.floor(Math.random() * 256);
+            }
+            var myColor = "rgb(" + color.r + ", " + color.g + ", " + color.b + ")";
+            ctx.fillStyle = myColor;
+        }
+
+        function Gcd(numberA, numberB) {
+            // 最大公約数
+            if (numberA < numberB) {
+                return Gcd(numberB, numberA);
+            }
+            while (numberB != 0) {
+                var temp = numberA % numberB;
+                numberA = numberB;
+                numberB = temp;
+            }
+            return numberA;
+        }
+        vectorSetup = myCanvas.onclick = (e) => {
+            if (e) event = e;
+            if (state == set) {
+                mx = e.offsetX - balls[0].x;
+                my = e.offsetY - balls[0].y;
+                vector = Math.sqrt(Math.pow(my, 2) + Math.pow(mx, 2));
+                state = setup;
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "32px Arial";
+            //ctx.fillStyle = "#0095DD";
+            // ctx.fillText("eDistance: " + euclideanDistance, 8, 40);
+            ctx.fillText("state: " + state, 300, 40);
+            ctx.fillText("dx: " + dx, 600, 40);
+            ctx.fillText("dy: " + dy, 600, 40);
+            for (let i = 0; i < ballCount; i++) {
+                balls[i].drawBall;
+            }
+            vectorSetup;
+            if (state == setup) {
+                balls[0].calculateVector;
+                for (let i = 0; i < 2; i++) {
+                    balls[i].dy = dy * (1 - 0.05 * (i + 1));
+                    balls[i].dx = dx * (1 - 0.05 * (i + 1));
+                }
+            }
+            if (state == move) {
+                for (let i = 0; i < ballCount; i++) {
+                    if (balls[i].x + balls[i].dx > canvas.width - balls[i].ballRadius || balls[i].x + balls[i].dx < balls[i].ballRadius) {
+                        balls[i].dx = -balls[i].dx;
+                        random();
+                    }
+                    if (balls[i].y + balls[i].dy < balls[i].ballRadius) {
+                        balls[i].dy = -balls[i].dy;
+                        random();
+                    }
+                    if (balls[i].y + balls[i].dy > canvas.height - balls[i].ballRadius) {
+                        if (goalBallNumber < 0) {
+                            balls[i].dy = 0;//-balls[i].dy;
+                            balls[i].dx = 0;
+                            goalBallNumber = i;
+                        }
+                        else {
+                            balls[i].y = balls[goalBallNumber].y;
+                            balls[i].x = balls[goalBallNumber].x;
+                        }
+                        setBallCount++;
+                    }
+                    if (setBallCount == balls.length) {
+                        state = set;
+                    }
+                    balls[i].x += balls[i].dx;
+                    balls[i].y += balls[i].dy;
+                }
+            }
+
+        }
+
+        setInterval(draw, 10);
+    </script>
+
+</body>
+
+</html>
