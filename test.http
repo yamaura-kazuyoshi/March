@@ -1,0 +1,21 @@
+http://127.0.0.1:3000/user
+###
+
+POST http://127.0.0.1:3000/user
+Content-Type: application/json
+
+{
+    "name": "John",
+    "age": 23
+}
+###
+GET http://127.0.0.1:3000/user/62411c3be38f098c8e742fuh
+###
+DELETE http://127.0.0.1:3000/user/62411d65e0ccf3d8e5dd45af
+###
+PATCH http://127.0.0.1:3000/user/62411c3be38f098c8e742f91
+Content-Type: application/json
+
+{
+    "age": 88
+}
